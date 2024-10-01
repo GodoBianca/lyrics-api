@@ -2,30 +2,28 @@
 from uuid import uuid4, UUID
 from typing import Optional
 from src.model.music_model import MusicModel
+from src.repository.music_repository import MusicRepository
 
 class MusicService:
     
+    #Mudei aqui para ele injetar agora no repository
     def __init__(self):
-        self.music_db: dict[UUID, MusicModel] = {}  # Armazena MusicModel diretamente
+        self.repository = MusicRepository()
 
     def find(self, id: UUID) -> Optional[MusicModel]:
-        return self.music_db.get(id)
+        return self.repository.find(id)
 
     def insert(self, music: MusicModel) -> MusicModel:
-        music_id = uuid4()
-        music.id = music_id
-        self.music_db[music_id] = music
-        return music
+        return self.repository.save(music)
     
     def update(self, id: UUID, updated_music: MusicModel) -> Optional[MusicModel]:
-        if id not in self.music_db:
+        if not self.find(id):
             return None
-        self.music_db[id].title = updated_music.title
-        self.music_db[id].content = updated_music.content
-        return self.music_db[id]
+        updated_music.id = id
+        return self.repository.save(updated_music)
 
     def delete(self, id: UUID) -> bool:
-        if id not in self.music_db:
+        if not self.find(id):
             return False
-        del self.music_db[id]
+        self.repository.delete(id)
         return True
