@@ -1,29 +1,31 @@
 # Este arquivo contém a lógica dos métodos find, insert, update e delete mockado
-
 from uuid import uuid4, UUID
-from typing import Dict, Optional
+from typing import Optional
+from src.model.music_model import MusicModel
 
 class MusicService:
+    
     def __init__(self):
-        self.music_db: Dict[UUID, dict] = {}
+        self.music_db: dict[UUID, MusicModel] = {}  # Armazena MusicModel diretamente
 
-    def find(self, music_id: UUID) -> Optional[dict]:
-        return self.music_db.get(music_id)
+    def find(self, id: UUID) -> Optional[MusicModel]:
+        return self.music_db.get(id)
 
-    def insert(self, music: dict) -> dict:
-        music_id = uuid4()  # Gera um novo UUID
-        music['id'] = music_id
+    def insert(self, music: MusicModel) -> MusicModel:
+        music_id = uuid4()
+        music.id = music_id
         self.music_db[music_id] = music
         return music
+    
+    def update(self, id: UUID, updated_music: MusicModel) -> Optional[MusicModel]:
+        if id not in self.music_db:
+            return None
+        self.music_db[id].title = updated_music.title
+        self.music_db[id].content = updated_music.content
+        return self.music_db[id]
 
-    def update(self, music_id: UUID, updated_music: dict) -> Optional[dict]:
-        if music_id in self.music_db:
-            self.music_db[music_id].update(updated_music)
-            return self.music_db[music_id]
-        return None
-
-    def delete(self, music_id: UUID) -> bool:
-        if music_id in self.music_db:
-            del self.music_db[music_id]
-            return True
-        return False
+    def delete(self, id: UUID) -> bool:
+        if id not in self.music_db:
+            return False
+        del self.music_db[id]
+        return True

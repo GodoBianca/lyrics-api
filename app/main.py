@@ -1,12 +1,11 @@
 # Este arquivo inicializa o servidor HTTP e inclui o roteamento.
 
 from fastapi import FastAPI
-from src.controler.music_controller import RouteAPI  # Importando a classe RouteAPI
+from src.controler.music_controller import MusicController 
 
 app = FastAPI()
 
-# Instancia a classe RouteAPI e inclui o roteador dela no app
-route_api = RouteAPI()
+route_api = MusicController()
 app.include_router(route_api.router)
 
 if __name__ == "__main__":
