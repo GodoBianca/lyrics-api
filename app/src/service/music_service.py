@@ -6,7 +6,6 @@ from src.repository.music_repository import MusicRepository
 
 class MusicService:
     
-    #Mudei aqui para ele injetar agora no repository
     def __init__(self):
         self.repository = MusicRepository()
 
