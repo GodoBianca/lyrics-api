@@ -18,11 +18,11 @@ class MusicRepository:
     def find(self, id: UUID) -> Optional[MusicModel]:
         cursor = self.connection.cursor()
         cursor.execute(
-            "SELECT id, title, content FROM musics WHERE id = %s", (str(id),))
+            "SELECT id, artist_id, title, content FROM musics WHERE id = %s", (str(id),))
         result = cursor.fetchone()
         cursor.close()
         if result:
-            return MusicModel(id=result[0], title=result[1], content=result[2])
+            return MusicModel(id=result[0], artist_id=result[1], title=result[2], content=result[3])
         return None
 
     def save(self, music: MusicModel) -> MusicModel:
@@ -31,14 +31,14 @@ class MusicRepository:
             if music.id is None:
                 music.id = uuid4()
                 cursor.execute(
-                    "INSERT INTO musics (id, title, content) VALUES (%s, %s, %s)",
-                    (str(music.id), music.title, music.content)
+                    "INSERT INTO musics (id, artist_id, title, content) VALUES (%s, %s, %s, %s)",
+                    (str(music.id), str(music.artist_id), music.title, music.content)
                 )
                 print(f"Music criado com ID: {music.id}")
             else:
                 cursor.execute(
-                    "UPDATE musics SET title = %s, content = %s WHERE id = %s",
-                    (music.title, music.content, str(music.id))
+                    "UPDATE musics SET artist_id = %s,title= %s, content = %s WHERE id = %s",
+                    ( str(music.artist_id), music.title, music.content, str(music.id))
                 )
                 print(f"Music atualizado com ID: {music.id}")
         except Exception as e:

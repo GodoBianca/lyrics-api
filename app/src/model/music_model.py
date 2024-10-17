@@ -4,5 +4,6 @@ from uuid import UUID
 
 class MusicModel(BaseModel):
     id: UUID = None
+    artist_id: UUID
     title: str
     content: str
