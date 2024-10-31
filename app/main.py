@@ -1,12 +1,16 @@
-# Este arquivo inicializa o servidor HTTP e inclui o roteamento.
+# Arquivo main.py: inicializa o servidor HTTP e inclui o roteamento.
 
 from fastapi import FastAPI
-from src.controler.music_controller import MusicController 
+from src.controler.music_controller import MusicController
+from src.controler.artist_controller import ArtistControler
 
 app = FastAPI()
 
-route_api = MusicController()
-app.include_router(route_api.router)
+music_controller = MusicController()
+artist_controller = ArtistControler()
+
+app.include_router(music_controller.router)
+app.include_router(artist_controller.router)
 
 if __name__ == "__main__":
     import uvicorn

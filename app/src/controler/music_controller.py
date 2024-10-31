@@ -10,30 +10,23 @@ music_service = MusicService()
 class MusicController:
     def __init__(self):
         self.router = APIRouter()
-        self.router.get(
-            "/musics/{id}", response_model=MusicModel)(self.get_music)
-        self.router.post(
-            "/musics", response_model=MusicModel)(self.create_music)
-        self.router.put(
-            "/musics/{id}", response_model=MusicModel)(self.update_music)
+        self.music_service = MusicService()  # Inicialize o serviço aqui
+        self.router.get("/musics/{id}", response_model=MusicModel)(self.get_music)
+        self.router.post("/musics", response_model=MusicModel)(self.create_music)
+        self.router.put("/musics/{id}", response_model=MusicModel)(self.update_music)
         self.router.delete("/musics/{id}")(self.delete_music)
 
     async def get_music(self, id: UUID):
         musics = music_service.find(id)
         if not musics:
-            raise HTTPException(status_code=404, detail="ID or ArtistId not found")
+            raise HTTPException(status_code=404, detail="ID not found")
         return musics
-    #Nao validei se o artistId pois nao faz sentido
 
     async def create_music(self, music: MusicModel):
-        if not music.artist_id:
-            raise HTTPException(status_code=400, detail="ArtistId is required")
         created_music = music_service.insert(music)
         return created_music
 
     async def update_music(self, id: UUID, updated_music: MusicModel):
-        if not updated_music.artist_id:
-            raise HTTPException(status_code=400, detail="ArtistId is required")
         musics = music_service.update(id, updated_music)
         if not musics:
             raise HTTPException(status_code=404, detail="ID not found")
