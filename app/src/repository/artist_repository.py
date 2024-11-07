@@ -17,12 +17,21 @@ class ArtistRepository:
 
     def find(self, artist_id: UUID) -> Optional[ArtistModel]:
         cursor = self.connection.cursor()
-        cursor.execute("SELECT artist_id, name FROM artists WHERE artist_id = %s", (str(artist_id),))
+        cursor.execute(
+            "SELECT artist_id, name FROM artists WHERE artist_id = %s", (str(artist_id),))
         result = cursor.fetchone()
         cursor.close()
         if result:
             return ArtistModel(artist_id=result[0], name=result[1])
         return None
+
+    def artist_exists(self, artist_id: UUID) -> bool:
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "SELECT EXISTS(SELECT 1 FROM artists WHERE id = %s)", (str(artist_id),))
+        exists = cursor.fetchone()[0]
+        cursor.close()
+        return exists
 
     def save(self, artists: ArtistModel) -> ArtistModel:
         cursor = self.connection.cursor()
@@ -30,8 +39,8 @@ class ArtistRepository:
             if artists.artist_id is None:
                 artists.artist_id = uuid4()
                 cursor.execute("INSERT INTO artists (artist_id, name) VALUES (%s, %s)",
-                            (str(artists.artist_id), str(artists.name)))
-                print(f"Artist criado com ID: {artists.artist_id}")          
+                               (str(artists.artist_id), str(artists.name)))
+                print(f"Artist criado com ID: {artists.artist_id}")
             else:
                 cursor.execute("UPDATE artists SET name = %s WHERE artist_id = %s",
                                (str(artists.name), str(artists.artist_id)))
@@ -42,10 +51,11 @@ class ArtistRepository:
         finally:
             self.connection.commit()
             cursor.close()
-        return artists 
+        return artists
 
     def delete(self, artist_id: UUID) -> None:
         cursor = self.connection.cursor()
-        cursor.execute("DELETE FROM artists WHERE artist_id = %s", (str(artist_id),))
+        cursor.execute(
+            "DELETE FROM artists WHERE artist_id = %s", (str(artist_id),))
         self.connection.commit()
         cursor.close()
