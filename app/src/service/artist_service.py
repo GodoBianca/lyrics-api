@@ -17,7 +17,7 @@ class ArtistService:
     def update(self, artist_id: UUID, update_artist: ArtistModel) -> Optional[ArtistModel]:
         if not self.find(artist_id):
             return None
-        update_artist.artist_id = artist_id
+        update_artist.id = artist_id
         return self.repository.save(update_artist)
 
     def delete(self, artist_id: UUID) -> bool:
