@@ -1,61 +1,56 @@
 from uuid import uuid4, UUID
 from typing import Optional
 from src.model.artist_model import ArtistModel
-import psycopg2
-
+from src.repository.database_connection import DatabaseConnection
 
 class ArtistRepository:
-
-    def __init__(self):
-        self.connection = psycopg2.connect(
-            dbname="",
-            user="",
-            password="",
-            host="",
-            port=""
-        )
-
     def find(self, artist_id: UUID) -> Optional[ArtistModel]:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            "SELECT artist_id, name FROM artists WHERE artist_id = %s", (str(artist_id),))
+        connection = DatabaseConnection.get_connection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT artist_id, name FROM artists WHERE artist_id = %s", (str(artist_id),))
         result = cursor.fetchone()
         cursor.close()
+        DatabaseConnection.return_connection(connection)
         if result:
             return ArtistModel(artist_id=result[0], name=result[1])
         return None
 
     def artist_exists(self, artist_id: UUID) -> bool:
-        cursor = self.connection.cursor()
+        connection = DatabaseConnection.get_connection()
+        cursor = connection.cursor()
         cursor.execute(
             "SELECT EXISTS(SELECT 1 FROM artists WHERE id = %s)", (str(artist_id),))
         exists = cursor.fetchone()[0]
         cursor.close()
         return exists
 
-    def save(self, artists: ArtistModel) -> ArtistModel:
-        cursor = self.connection.cursor()
+    def save(self, artist: ArtistModel) -> ArtistModel:
+        connection = DatabaseConnection.get_connection()
+        cursor = connection.cursor()
         try:
-            if artists.artist_id is None:
-                artists.artist_id = uuid4()
-                cursor.execute("INSERT INTO artists (artist_id, name) VALUES (%s, %s)",
-                               (str(artists.artist_id), str(artists.name)))
-                print(f"Artist criado com ID: {artists.artist_id}")
+            if artist.artist_id is None:
+                artist.artist_id = uuid4()
+                cursor.execute("INSERT INTO artists (artist_id, name) VALUES (%s, %s)", (str(
+                    artist.artist_id), artist.name))
             else:
                 cursor.execute("UPDATE artists SET name = %s WHERE artist_id = %s",
-                               (str(artists.name), str(artists.artist_id)))
-                print(f"Artist atualizado com ID: {artists.artist_id}")
+                               (artist.name, str(artist.artist_id)))
         except Exception as e:
-            self.connection.rollback()
-            print(f"Erro ao salvar artista: {e}")
+            connection.rollback()
+            print(f"Error saving artist: {e}")
         finally:
-            self.connection.commit()
+            connection.commit()
             cursor.close()
-        return artists
+            DatabaseConnection.return_connection(connection)
+        return artist
 
-    def delete(self, artist_id: UUID) -> None:
-        cursor = self.connection.cursor()
+    def delete(self, artist_id: UUID) -> bool:
+        connection = DatabaseConnection.get_connection()
+        cursor = connection.cursor()
         cursor.execute(
             "DELETE FROM artists WHERE artist_id = %s", (str(artist_id),))
-        self.connection.commit()
+        deleted = cursor.rowcount > 0
+        connection.commit()
         cursor.close()
+        DatabaseConnection.return_connection(connection)
+        return deleted

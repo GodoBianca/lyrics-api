@@ -1,11 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query
-from src.service.artist_service import ArtistService
+from fastapi import APIRouter, HTTPException
 from uuid import UUID
+from src.service.artist_service import ArtistService
 from src.model.artist_model import ArtistModel
 
 artist_service = ArtistService()
 
-class ArtistControler:
+class ArtistController:
     def __init__(self):
         self.router = APIRouter()
         self.router.get("/artists/{artist_id}", response_model=ArtistModel)(self.get_artist)
@@ -21,15 +21,15 @@ class ArtistControler:
 
     async def create_artist(self, model: ArtistModel):
         if not model.name:
-            raise HTTPException(status_code=400, detail="ArtistId is required")
+            raise HTTPException(status_code=400, detail="Artist name is required")
         created_artist = artist_service.insert(model)
         return created_artist
 
     async def update_artist(self, artist_id: UUID, update_artist: ArtistModel):
-        artists = artist_service.update(artist_id, update_artist)
-        if not artists:
+        updated_artist = artist_service.update(artist_id, update_artist)
+        if not updated_artist:
             raise HTTPException(status_code=404, detail="Artist not found")
-        return artists
+        return updated_artist
 
     async def delete_artist(self, artist_id: UUID):
         if not artist_service.delete(artist_id):

@@ -1,13 +1,11 @@
-# Arquivo main.py: inicializa o servidor HTTP e inclui o roteamento.
-
 from fastapi import FastAPI
-from src.controler.music_controller import MusicController
-from src.controler.artist_controller import ArtistControler
+from src.controller.music_controller import MusicController
+from src.controller.artist_controller import ArtistController
 
 app = FastAPI()
 
 music_controller = MusicController()
-artist_controller = ArtistControler()
+artist_controller = ArtistController()
 
 app.include_router(music_controller.router)
 app.include_router(artist_controller.router)
